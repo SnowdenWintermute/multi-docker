@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t snowd3n/react-test -f./client/Dockerfile.dev ./client
+script:
+  - docker run -e CI=true SnowdenWintermute/react-test npm test
+
+after_success:
+  - docker build -t snowd3n/multi-client ./client
+  - docker build -t snowd3n/multi-nginx ./nginx
+  - docker build -t snowd3n/multi-server ./server
+  - docker build -t snowd3n/multi-worker ./worker
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  - docker push snowd3n/multi-client
+  - docker push snowd3n/multi-nginx
+  - docker push snowd3n/multi-server
+  - docker push snowd3n/multi-worker
