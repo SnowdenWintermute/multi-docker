@@ -1,48 +1,35 @@
 version: "3"
 services:
-  nginx:
-    restart: always
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./nginx
-    ports:
-      - "3050:80"
-  postgres:
-    image: "postgres:latest"
-    environment:
-      - POSTGRES_PASSWORD=postgres_password
-  redis:
-    image: "redis:latest"
-  api:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./server
-    volumes:
-      - /home/node/app/node_modules
-      - ~/complex/server:/home/node/app
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - PGUSER=postgres
-      - PGHOST=postgres
-      - PGDATABASE=postgres
-      - PGPASSWORD=postgres_password
-      - PGPORT=5432
   client:
-    stdin_open: true
-    build:
-      dockerfile: Dockerfile.dev
-      context: ~/complex/client
-    volumes:
-      - /home/node/app/node_modules
-      - ~/complex/client:/home/node/app
-  worker:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ~/complex/worker
-    volumes:
-      - /home/node/app/node_modules
-      - ~/complex/worker:/home/node/app
+    image: "snowd3n/multi-client"
+    mem_limit: 128m
+    hostname: client
+  server:
+    image: "snowd3n/multi-server"
+    mem_limit: 128m
+    hostname: api
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+    - REDIS_HOST=$REDIS_HOST
+    - REDIS_PORT=$REDIS_PORT
+    - PGUSER=$PGUSER
+    - PGHOST=$PGHOST
+    - PGDATABASE=$PGDATABASE
+    - PGPASSWORD=$PGPASSWORD
+    - PGPORT=$PGPORT
+  worker:
+    image: "snowd3n/multi-worker"
+    mem_limit: 128m
+    hostname: worker
+  worker:
+    image: "snowd3n/multi-worker"
+    mem_limit: 128m
+    hostname: worker
+    environment:
+    - REDIS_HOST=$REDIS_HOST
+    - REDIS_PORT=$REDIS_PORT
+  nginx:
+    image: "snowd3n/multi-nginx"
+    mem_limit: 128m
+    hostname: nginx
+    ports:
+      - "80:80"
