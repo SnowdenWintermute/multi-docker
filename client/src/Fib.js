@@ -29,7 +29,7 @@ const Fib = () => {
   };
 
   const renderSeenIndices = () =>
-    seenIndices.map(({ number }) => number).join(", ");
+    seenIndices?.map(({ number }) => number).join(", ");
 
   const renderValues = () =>
     values && Object.keys.values?.length
